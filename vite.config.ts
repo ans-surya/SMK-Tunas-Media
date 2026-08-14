@@ -5,6 +5,7 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    base: '/SMK-Tunas-Media/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

@@ -12,7 +12,12 @@ export const LoginView: React.FC<LoginViewProps> = ({
   isDarkMode,
   onToggleDarkMode,
 }) => {
-  const [username, setUsername] = useState("SMK Tunas Media");
+  const [username, setUsername] = useState(() => {
+    if (typeof window !== "undefined" && window.location.hostname.endsWith("github.io")) {
+      return localStorage.getItem("smk_tunas_media_username") || "SMK Tunas Media";
+    }
+    return "SMK Tunas Media";
+  });
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,6 +34,25 @@ export const LoginView: React.FC<LoginViewProps> = ({
     setErrorMsg(null);
 
     try {
+      // GitHub Pages is a static host and has no /api server. In demo/static mode,
+      // keep credentials in localStorage so the app remains fully usable offline.
+      const isStaticDemo = import.meta.env.VITE_DEMO_MODE !== "false" &&
+        typeof window !== "undefined" &&
+        window.location.hostname.endsWith("github.io");
+
+      if (isStaticDemo) {
+        const storedUsername = localStorage.getItem("smk_tunas_media_username") || "SMK Tunas Media";
+        const storedPassword = localStorage.getItem("smk_tunas_media_password") || "Bissmillah";
+        if (username.trim() === storedUsername && password.trim() === storedPassword) {
+          localStorage.setItem("edadmin_auth_token", "github-pages-demo-session");
+          localStorage.setItem("edadmin_user", JSON.stringify({ username: storedUsername }));
+          onLoginSuccess();
+        } else {
+          setErrorMsg("Username atau Password tidak valid.");
+        }
+        return;
+      }
+
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -53,7 +77,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
       }
     } catch (err) {
       console.error("Login fetch error:", err);
-      setErrorMsg("Gagal terhubung ke server autentikasi. Silakan periksa koneksi Anda.");
+      setErrorMsg("Gagal terhubung ke server autentikasi. Untuk GitHub Pages, gunakan mode demo lokal.");
     } finally {
       setLoading(false);
     }
@@ -135,9 +159,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 <input
                   type="text"
                   required
-                  readOnly
                   value={username}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none cursor-not-allowed select-none text-sm transition-all font-bold"
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-sm transition-all font-bold"
                 />
               </div>
             </div>

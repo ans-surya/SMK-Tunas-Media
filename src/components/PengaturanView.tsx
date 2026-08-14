@@ -63,8 +63,19 @@ export const PengaturanView: React.FC<PengaturanViewProps> = ({ config, onNaviga
       // Save the profile/configuration first. In demo mode this remains local-first.
       await savePengaturan(form);
 
-      // Also update the server-side active credentials. This makes the new login
-      // usable immediately instead of waiting for an environment-variable change.
+      const isStaticDemo = import.meta.env.VITE_DEMO_MODE !== "false" &&
+        typeof window !== "undefined" &&
+        window.location.hostname.endsWith("github.io");
+
+      if (isStaticDemo) {
+        // GitHub Pages has no server/API. Persist the active credentials locally.
+        localStorage.setItem("smk_tunas_media_username", form.username.trim());
+        localStorage.setItem("smk_tunas_media_password", form.password.trim());
+        notifySimpanSuccess("Username dan password berhasil diubah dan langsung aktif di browser ini. Silakan logout lalu login kembali.");
+        return;
+      }
+
+      // Server-backed deployment: activate credentials through the authenticated API.
       const authToken = localStorage.getItem("edadmin_auth_token");
       const authResponse = await fetch("/api/auth/credentials", {
         method: "POST",
