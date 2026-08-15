@@ -281,7 +281,7 @@ export const PengaturanView: React.FC<PengaturanViewProps> = ({ config, onNaviga
                     id="password"
                     value={form.password || ""}
                     onChange={handleChange}
-                    placeholder="Bissmillah"
+                    placeholder="Bismillah"
                     className="w-full pl-3 pr-10 py-2 text-xs border rounded-lg bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                   />
                   <button
