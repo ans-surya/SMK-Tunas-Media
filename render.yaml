@@ -1,66 +1,18 @@
-name: Deploy SMK Tunas Media to GitHub Pages
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build Vite
-        run: npm run build:web
-        env:
-          VITE_DEMO_MODE: 'true'
-
-      - name: Verify dist
-        run: |
-          echo "=== DIST ==="
-          find dist -maxdepth 3 -type f | sort
-          echo "=== INDEX ==="
-          cat dist/index.html
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: ./dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+services:
+  - type: web
+    name: smk-tunas-media
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_DEMO_MODE
+        value: "true"
+      - key: AUTH_USERNAME
+        value: SMK Tunas Media
+      - key: AUTH_PASSWORD
+        value: "Bissmillah"
+      - key: GEMINI_API_KEY
+        sync: false
